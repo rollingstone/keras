@@ -184,11 +184,14 @@ def variable(value, dtype=_FLOATX, name=None):
 
 
 def _initialize_variables():
+	# tf.all_variables() and tf.initialize_variables() will be 
+	# depreciated in future versions of tensorflow
     if hasattr(tf, 'global_variables'):
         variables = tf.global_variables()
     else:
         variables = tf.all_variables()
-    uninitialized_variables = []
+
+	uninitialized_variables = []
     for v in variables:
         if not hasattr(v, '_keras_initialized') or not v._keras_initialized:
             uninitialized_variables.append(v)
@@ -196,10 +199,11 @@ def _initialize_variables():
     if uninitialized_variables:
         sess = get_session()
         if hasattr(tf, 'variables_initializer'):
-			sess.run(tf.variables_initializer(uninitialized_variables))
+			init = tf.variables_initializer(uninitialized_variables)
         else:
-			sess.run(tf.initialize_variables(uninitialized_variables))
-
+			init = tf.initialize_variables(uninitialized_variables)
+		sess.run(init)
+		
 def placeholder(shape=None, ndim=None, dtype=_FLOATX, sparse=False, name=None):
     '''Instantiates a placeholder.
 
